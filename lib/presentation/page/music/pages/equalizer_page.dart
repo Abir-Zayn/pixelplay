@@ -1,12 +1,17 @@
 import 'package:equalizer_flutter/equalizer_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:lottie/lottie.dart';
+import 'package:pixelplayapp/common/widgets/apptext.dart';
 import 'package:pixelplayapp/core/config/service_locator.dart';
+import 'package:pixelplayapp/core/config/src/appvectors.dart';
+import 'package:pixelplayapp/core/config/theme/appColors.dart';
 import 'package:pixelplayapp/data/src/audio_player_service.dart';
 import 'package:pixelplayapp/common/widgets/appstyle.dart';
 
+// This page is for the Equalizer settings of the music player.
+// It allows users to enable/disable the equalizer and select audio presets.
+// The page uses the EqualizerFlutter package and perform similar like device's equalizer.
 class EqualizerPage extends StatefulWidget {
   const EqualizerPage({super.key});
 
@@ -15,77 +20,55 @@ class EqualizerPage extends StatefulWidget {
 }
 
 class _EqualizerPageState extends State<EqualizerPage> {
+  //state variables
+  // equalizerEnabled: to check if the equalizer is enabled or not
   bool equalizerEnabled = false;
+
+  // selectedPreset: to store the currently selected preset
   String? selectedPreset;
+
+  // audioService: to access the audio player service
   final AudioPlayerService audioService = sl<AudioPlayerService>();
+
+  //Future to lead equalizer presets
   late Future<List<String>> presetsFuture;
 
   @override
   void initState() {
     super.initState();
+    // Initialize the equalizer with audio session ID 0
     EqualizerFlutter.init(0);
+
+    // Load available presets names from the equalizer
     presetsFuture = EqualizerFlutter.getPresetNames();
   }
 
   @override
   void dispose() {
+    // Release the equalizer when the page is disposed
     EqualizerFlutter.release();
     super.dispose();
   }
 
-  Future<void> _requestPermissionAndOpenEqualizer(BuildContext context) async {
-    var status = await Permission.audio.request();
-    if (status.isGranted) {
-      try {
-        await EqualizerFlutter.open(0);
-      } on PlatformException catch (e) {
-        final snackBar = SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text('${e.message}\n${e.details}'),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Permission to access audio settings denied.'),
-        ),
-      );
-    }
-  }
-
+  // This page doesnt follow the principle of ThemeData and ThemeMode
+  // As I have declared the background color in the appBar and body to black
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //AppBar with title 'Equalizer'
       appBar: AppBar(
-        title: Text('Equalizer',
+        title: AppTextstyle(
+            text: 'Equalizer',
             style: appStyle(
                 size: 20.sp, color: Colors.white, fontWeight: FontWeight.w500)),
         backgroundColor: Colors.black,
       ),
+      //Body with black background color
       backgroundColor: Colors.black87,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         child: ListView(
           children: [
-            SizedBox(height: 30.h),
-            Center(
-              child: ElevatedButton(
-                onPressed: () => _requestPermissionAndOpenEqualizer(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                ),
-                child: Text(
-                  'Open Device Equalizer',
-                  style: appStyle(
-                      size: 16.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500),
-                ),
-              ),
-            ),
             SizedBox(height: 30.h),
             Container(
               padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
@@ -125,18 +108,31 @@ class _EqualizerPageState extends State<EqualizerPage> {
     );
   }
 
+// By the name convention, this function is used to build the preset selector
+
   Widget _buildPresetSelector() {
     return FutureBuilder<List<String>>(
+      // FutureBuilder to load the presets
+      // The future is the list of presets loaded from the equalizer
       future: presetsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return Center(
+            child: Lottie.asset(
+              Appvectors.loadingAnimation,
+              width: 100.w,
+              height: 100.h,
+              fit: BoxFit.cover,
+              repeat: true,
+              frameRate: FrameRate(60),
+            ),
+          );
         }
 
         if (snapshot.hasError) {
           return Center(
-            child: Text(
-              'Error loading presets: ${snapshot.error}',
+            child: AppTextstyle(
+              text: 'Error loading presets: ${snapshot.error}',
               style: appStyle(
                   size: 14.sp, color: Colors.red, fontWeight: FontWeight.w400),
               textAlign: TextAlign.center,
@@ -145,10 +141,11 @@ class _EqualizerPageState extends State<EqualizerPage> {
         }
 
         final presets = snapshot.data ?? [];
+        // Empty state
         if (presets.isEmpty) {
           return Center(
-            child: Text(
-              'No presets available',
+            child: AppTextstyle(
+              text: 'No presets available',
               style: appStyle(
                   size: 16.sp,
                   color: Colors.white,
@@ -158,6 +155,7 @@ class _EqualizerPageState extends State<EqualizerPage> {
           );
         }
 
+        // Build list of preset options
         return Column(
           children: presets.map((preset) => _buildPresetTile(preset)).toList(),
         );
@@ -165,12 +163,15 @@ class _EqualizerPageState extends State<EqualizerPage> {
     );
   }
 
+  /// Builds an individual preset selection tile
   Widget _buildPresetTile(String preset) {
     bool isSelected = selectedPreset == preset;
 
     return InkWell(
       onTap: equalizerEnabled
           ? () {
+              // If the equalizer is enabled, set the selected preset
+              // and update the state
               EqualizerFlutter.setPreset(preset);
               setState(() {
                 selectedPreset = preset;
@@ -182,27 +183,30 @@ class _EqualizerPageState extends State<EqualizerPage> {
         padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.blue.withOpacity(0.2)
-              : Colors.grey.withOpacity(0.1),
+              ? Colors.blue.withOpacity(0.2) //selected
+              : Colors.grey.withOpacity(0.1), //unselected
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? Colors.blue : Colors.transparent,
+            color: isSelected ? AppColors.primaryColor : Colors.transparent,
             width: 1,
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              preset,
+            // Display the preset name
+            AppTextstyle(
+              text: preset,
               style: appStyle(
                 size: 16.sp,
-                color: isSelected ? Colors.blue : Colors.white,
+                color: isSelected ? AppColors.primaryColor : Colors.white,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
+            // Display a check icon if the preset is selected
             if (isSelected)
-              Icon(Icons.check_circle, color: Colors.blue, size: 20.sp),
+              Icon(Icons.check_circle,
+                  color: AppColors.primaryColor, size: 20.sp),
           ],
         ),
       ),
