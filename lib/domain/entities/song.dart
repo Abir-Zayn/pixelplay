@@ -9,6 +9,8 @@ class SongEntity {
   final String musicUrl;
   final String id;
   bool isFav;
+  final String searchOpt;
+  final String genre;
 
   SongEntity({
     required this.id,
@@ -19,5 +21,7 @@ class SongEntity {
     required this.imageUrl,
     required this.musicUrl,
     this.isFav = false,
+    required this.searchOpt,
+    required this.genre,
   });
 }

@@ -27,6 +27,15 @@ class AuthRepoImplementation extends AuthRepo {
 
   @override
   Future<Either> getUser() async {
-    return await sl<AuthFirebaseService>().getUser(); 
+    return await sl<AuthFirebaseService>().getUser();
+  }
+
+  @override
+  Future<Either<String, UserCredential>> signInwithGoogle() async {
+    return await sl<AuthFirebaseService>().signInwithGoogle();
+  }
+  @override
+  Future<void> signOut() async {
+    await sl<AuthFirebaseService>().signOut();
   }
 }

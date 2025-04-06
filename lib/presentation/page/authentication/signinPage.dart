@@ -1,8 +1,4 @@
-import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +10,10 @@ import 'package:pixelplayapp/core/config/service_locator.dart';
 import 'package:pixelplayapp/core/config/src/appvectors.dart';
 import 'package:pixelplayapp/core/config/theme/appColors.dart';
 import 'package:pixelplayapp/data/model/auth/user_login.dart';
+
+import 'package:pixelplayapp/domain/usecase/auth/signInGoogle.dart';
 import 'package:pixelplayapp/domain/usecase/auth/signinUseCase.dart';
+import 'package:toastification/toastification.dart';
 
 class Signinpage extends StatefulWidget {
   const Signinpage({super.key});
@@ -80,6 +79,8 @@ class _SigninpageState extends State<Signinpage> {
             ),
             //Sign in - Email Textfield
             Apptextfield(
+              style: appStyle(
+                  size: 18.sp, color: color, fontWeight: FontWeight.w400),
               controller: emailController,
               borderRadius: 20.r,
               hintText: "Enter your email",
@@ -101,6 +102,8 @@ class _SigninpageState extends State<Signinpage> {
 
             //Sign in - Password Textfield
             Apptextfield(
+              style: appStyle(
+                  size: 18.sp, color: color, fontWeight: FontWeight.w400),
               controller: passwordController,
               borderRadius: 20.r,
               hintText: "Password",
@@ -145,18 +148,20 @@ class _SigninpageState extends State<Signinpage> {
                   },
                   (r) {
                     // Handle success
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: Colors.green,
-                        content: AppTextstyle(
-                            text: r.toString(),
-                            style: appStyle(
-                                size: 13.sp,
-                                color: AppColors.lightBackgroundColor,
-                                fontWeight: FontWeight.w500)),
-                      ),
+
+                    toastification.show(
+                      context: context,
+                      title: AppTextstyle(
+                          text: 'Login Successful',
+                          style: appStyle(
+                              size: 16.sp,
+                              color: AppColors.darkBackgroundColor,
+                              fontWeight: FontWeight.w500)),
+                      autoCloseDuration: const Duration(seconds: 2),
+                      type: ToastificationType.success,
                     );
-                    context.go('/home');
+                    // Navigate to home screen
+                    context.go('/entrypoint');
                   },
                 );
               },
@@ -215,7 +220,43 @@ class _SigninpageState extends State<Signinpage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () async {
+                    final res = await sl<SignInWithGoogleUseCase>().call();
+                    res.fold(
+                      (l) {
+                        // Handle error
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            duration: const Duration(seconds: 10),
+                            content: AppTextstyle(
+                              text: l.toString(),
+                              style: appStyle(
+                                  size: 13.sp,
+                                  color: AppColors.lightBackgroundColor,
+                                  fontWeight: FontWeight.w500),
+                              maxLines: 5,
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      },
+                      (r) {
+                        // Handle success
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: Colors.green,
+                            content: AppTextstyle(
+                                text: "Signed in successfully",
+                                style: appStyle(
+                                    size: 13.sp,
+                                    color: AppColors.lightBackgroundColor,
+                                    fontWeight: FontWeight.w500)),
+                          ),
+                        );
+                        context.go('/entrypoint');
+                      },
+                    );
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20.r),

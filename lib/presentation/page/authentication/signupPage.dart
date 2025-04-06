@@ -80,6 +80,8 @@ class _SignupPageState extends State<SignupPage> {
 
               // Name TextField
               Apptextfield(
+                style: appStyle(
+                    size: 18.sp, color: textcolor, fontWeight: FontWeight.w400),
                 controller: nameController,
                 borderRadius: 20.r,
                 hintText: "Enter your name",
@@ -99,6 +101,8 @@ class _SignupPageState extends State<SignupPage> {
 
               // Email TextField
               Apptextfield(
+                style: appStyle(
+                    size: 18.sp, color: textcolor, fontWeight: FontWeight.w400),
                 controller: emailController,
                 borderRadius: 20.r,
                 hintText: "Enter your email",
@@ -120,6 +124,8 @@ class _SignupPageState extends State<SignupPage> {
 
               // Password TextField
               Apptextfield(
+                style: appStyle(
+                    size: 18.sp, color: textcolor, fontWeight: FontWeight.w400),
                 controller: passwordController,
                 borderRadius: 20.r,
                 hintText: "Create password",

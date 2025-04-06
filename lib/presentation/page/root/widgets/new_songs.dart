@@ -4,9 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:pixelplayapp/common/widgets/appstyle.dart';
 import 'package:pixelplayapp/common/widgets/apptext.dart';
+import 'package:pixelplayapp/core/config/src/appvectors.dart';
 import 'package:pixelplayapp/core/config/theme/appColors.dart';
 import 'package:pixelplayapp/domain/entities/song.dart';
 import 'package:pixelplayapp/presentation/page/root/bloc/new_song_cubit.dart';
@@ -14,9 +16,12 @@ import 'package:pixelplayapp/presentation/page/root/bloc/new_song_state_cubit.da
 
 class NewSongs extends StatelessWidget {
   Color color;
+  final Function(SongEntity, bool) onSongPlayed;
+
   NewSongs({
     super.key,
     required this.color,
+    required this.onSongPlayed,
   });
 
   @override
@@ -24,12 +29,21 @@ class NewSongs extends StatelessWidget {
     return BlocProvider(
         create: (_) => NewSongCubit()..getNewSongs(),
         child: SizedBox(
-          height: 350.h,
           child: BlocBuilder<NewSongCubit, NewSongStateCubit>(
             builder: (context, state) {
               //Loading state
               if (state is NewSongStateCubitLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(
+                  child: Center(
+                    child: Lottie.asset(
+                      Appvectors.loadingAnimation,
+                      width: 100.w,
+                      height: 100.h,
+                      fit: BoxFit.contain,
+                      repeat: true,
+                    ),
+                  ),
+                );
               }
               //Error state
               else if (state is NewSongStateCubitError) {
@@ -56,11 +70,12 @@ class NewSongs extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   // Using a property that exists in SongEntity, like title or a unique identifier
+                  onSongPlayed(songs[index], true);
                   context.push('/musicplayer/${songs[index].id}');
                 },
                 child: Container(
-                  width: 170.w,
-                  height: 180
+                  width: 200.w,
+                  height: 250
                       .h, // Increase height to make better use of available space
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30.r),

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pixelplayapp/common/widgets/appstyle.dart';
 import 'package:pixelplayapp/common/widgets/apptext.dart';
+import 'package:pixelplayapp/core/config/service_locator.dart';
 import 'package:pixelplayapp/core/config/theme/appColors.dart';
+import 'package:pixelplayapp/domain/repo/auth_repo.dart';
 import 'package:pixelplayapp/presentation/page/profile/bloc/cubit/profile_info_cubit_cubit.dart';
 import 'package:pixelplayapp/presentation/page/profile/widget/favSongs.dart';
 
@@ -58,7 +61,7 @@ class _ProfilepageState extends State<Profilepage> {
       create: (context) => ProfileInfoCubitCubit()..getUser(),
       child: Center(
         child: Container(
-          height: MediaQuery.of(context).size.height * 0.4,
+          height: MediaQuery.of(context).size.height * 0.45,
           width: MediaQuery.of(context).size.width * 0.94,
           decoration: BoxDecoration(
             color: Theme.of(context).brightness == Brightness.light
@@ -167,9 +170,47 @@ class _ProfilepageState extends State<Profilepage> {
                     ),
                   ),
                   SizedBox(
-                    height: 20.h,
+                    height: 10.h,
                   ),
-              
+                  ElevatedButton(
+                    onPressed: () async {
+                      //Implementing LogOut logic
+                      await sl<AuthRepo>().signOut();
+
+                      // Show a snackbar to indicate successful logout
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          duration: const Duration(seconds: 1),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.amber,
+                          content: AppTextstyle(
+                              text: "Logged Out Successfully",
+                              style: appStyle(
+                                  size: 12.sp,
+                                  color: AppColors.darkBackgroundColor,
+                                  fontWeight: FontWeight.w300)),
+                        ),
+                      );
+                      //take the user to the login page
+                      context.go('/signin');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 20.w, vertical: 10.h),
+                    ),
+                    child: AppTextstyle(
+                      text: "Log Out",
+                      style: appStyle(
+                          size: 14.sp,
+                          color: AppColors.lightBackgroundColor,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ),
+
                   //Show Following + Followers List , Followers List will be static for now
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,

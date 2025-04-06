@@ -9,4 +9,6 @@ class Appvectors {
       'assets/images/appimg/signinsignup1.png';
   static const String signinsignupImgPath2 =
       'assets/images/appimg/signinsignup2.png';
+  static const String loadingAnimation =
+      'assets/images/logo/loadingAnimation.json';
 }

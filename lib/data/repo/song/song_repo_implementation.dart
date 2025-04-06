@@ -34,4 +34,13 @@ class SongRepositoryImplementation extends SongRepo {
   Future<Either> getUserFavSong() async {
     return await sl<SongsFirebaseService>().getUserFavSong();
   }
+
+  @override
+  Future<Either<String, List<SongEntity>>> searchSongs(String query) async {
+    return await sl<SongsFirebaseService>().searchSongs(query);
+  }
+  @override
+  Future<Either<String, List<SongEntity>>> getSongsByGenre(String genre) async {
+    return await sl<SongsFirebaseService>().getSongsByGenre(genre);
+  }
 }

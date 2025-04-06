@@ -8,4 +8,6 @@ abstract class AuthRepo {
   Future<Either> signin(UserLogin userLogin);
   Future<User?> seamlessLogin();
   Future<Either> getUser();
+  Future<Either<String, UserCredential>> signInwithGoogle();
+  Future<void> signOut();
 }
