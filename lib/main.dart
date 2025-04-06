@@ -15,9 +15,12 @@ import 'package:pixelplayapp/presentation/page/root/bloc/new_song_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize JustAudio Background
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   await initializeDependencies();
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: kIsWeb
@@ -28,31 +31,58 @@ Future<void> main() async {
   runApp(Main());
 }
 
+void _applySystemUISettings(BuildContext context, ThemeMode state) {
+ final themeCubit = context.read<ThemeCubit>();
+    final isDark = themeCubit.isDarkModeOn;
+    
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor: isDark ? Colors.black : Colors.white,
+      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+    ));
+  }
+  
+
 class Main extends StatelessWidget {
   const Main({super.key});
 
+  //Used for adaptive System appbar design as most of the appbar 
+  // doesn't have a color thats matched with the system appbar
   @override
   Widget build(BuildContext context) {
-    //Some of system settings mainly responsible for the top app bar
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.white, // Set the color of the status bar
-      statusBarIconBrightness: Brightness.dark, // For Android: use dark icons
-      statusBarBrightness: Brightness.light, // For iOS: use light icons
-    ));
+     
+     //!Refactorized the code and moved into the _applySystemUISettings method
+
+    // Determine the screen size
     Size screensize = MediaQuery.of(context).size;
 
+    // Manage the Screen theme (light/dark)
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => NewSongCubit()),
       ],
+
+      /*** 
+        Initialize the ScreenUtil package for responsive design
+        minTextAdapt: true, => Enable minimum text adaptation
+        using the InheritedMediaQuery to ensure the mediaquery is inherited
+        SplitScreenMode: false, => Disable split screen mode for better performance
+
+      ***/
       child: ScreenUtilInit(
         designSize: screensize,
         minTextAdapt: true,
         splitScreenMode: false,
         useInheritedMediaQuery: true,
         builder: (_, Widget? child) {
+          // Using BlocBuilder to listen and build state when the theme changes
+          // approuter has the routes and the logic for the app navigation
           return BlocBuilder<ThemeCubit, ThemeMode>(builder: (context, state) {
+
+            _applySystemUISettings(context, state);
             return MaterialApp.router(
               routerConfig: appRouter,
               theme: Apptheme.lightTheme,

@@ -8,4 +8,6 @@ abstract class SongRepo {
   Future<Either> addOrRemoveFavSong(String songId);
   Future<bool> checkIfSongIsFav(String songId);
   Future<Either> getUserFavSong();
+  Future<Either<String, List<SongEntity>>> searchSongs(String query);
+  Future<Either<String, List<SongEntity>>> getSongsByGenre(String genre);
 }

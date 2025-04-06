@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:lottie/lottie.dart';
 import 'package:pixelplayapp/common/widgets/appstyle.dart';
 import 'package:pixelplayapp/common/widgets/apptext.dart';
 import 'package:pixelplayapp/core/config/service_locator.dart';
@@ -105,16 +107,39 @@ class _MusicPlayerState extends State<MusicPlayer> {
             ),
           ),
           actions: [
-            IconButton(
-              onPressed: () {},
-              icon: Icon(FontAwesomeIcons.bars, color: textColor),
-            ),
+            PopupMenuButton(
+                icon: Icon(Icons.more_vert, color: textColor),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'Equalizer':
+                      context.push('/equalizer');
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                      PopupMenuItem(
+                        value: 'Equalizer',
+                        child: AppTextstyle(
+                            text: 'Equalizer',
+                            style: appStyle(
+                                size: 16.sp,
+                                color: textColor,
+                                fontWeight: FontWeight.w500)),
+                      ),
+                    ])
           ],
         ),
         body: BlocBuilder<GetMusicByIdCubit, GetMusicByIdState>(
           builder: (context, state) {
             if (state is GetMusicByIdLoading) {
-              return Center(child: CircularProgressIndicator());
+              return Center(
+                  child: Lottie.asset(
+                Appvectors.loadingAnimation,
+                width: 80.w,
+                height: 80.h,
+                fit: BoxFit.contain,
+                repeat: true,
+              ));
             } else if (state is GetMusicByIdError) {
               return Center(child: Text('Error: ${state.error}'));
             } else if (state is GetMusicByIdSuccess) {
