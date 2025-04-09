@@ -28,9 +28,11 @@ class _RootpageState extends State<Rootpage>
   final AudioPlayerService _audioPlayerService = sl<AudioPlayerService>();
   late TabController _tabController;
   int _currentIndex = 0;
-  SongEntity? currentlyPlaying;
+  SongEntity? _currentlyPlaying;
   bool isPlaying = false;
   late StreamSubscription<bool> _playStateSubscription;
+
+  SongEntity? get currentlyPlaying => _currentlyPlaying;
 
   @override
   void initState() {
@@ -53,35 +55,55 @@ class _RootpageState extends State<Rootpage>
   }
 
   void _playPause() async {
-    if (currentlyPlaying == null) return;
+    if (_currentlyPlaying == null) return;
 
     if (_audioPlayerService.player.playing) {
       await _audioPlayerService.pause();
     } else {
-      await _audioPlayerService.play(currentlyPlaying!.musicUrl);
+      await _audioPlayerService.play(_currentlyPlaying!.musicUrl);
     }
 
     setState(() {
-      isPlaying = !isPlaying;
+      isPlaying = isPlaying;
     }); // Trigger rebuild to update UI
   }
 
   void updateCurrentlyPlaying(SongEntity song, bool isPlaying) async {
-    if (isPlaying) {
-      await _audioPlayerService.play(song.musicUrl);
-    } else {
-      await _audioPlayerService.pause();
-    }
+    bool isSameSong =
+        _currentlyPlaying != null && _currentlyPlaying!.id == song.id;
+
     setState(() {
-      currentlyPlaying = song;
+      _currentlyPlaying = song;
+      isPlaying = isSameSong;
     });
+
+    if (isPlaying) {
+      if (!isSameSong) {
+        await _audioPlayerService.play(song.musicUrl);
+      } else if (!_audioPlayerService.player.playing) {
+        {
+          await _audioPlayerService.play(song.musicUrl);
+        }
+      } else {
+        await _audioPlayerService.pause();
+      }
+    }
+
+    // if (isPlaying) {
+    //   await _audioPlayerService.play(song.musicUrl);
+    // } else {
+    //   await _audioPlayerService.pause();
+    // }
+    // setState(() {
+    //   _currentlyPlaying = song;
+    //   this.isPlaying = isPlaying; // Ensure isPlaying is updated here
+    // });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     _playStateSubscription.cancel();
-
     super.dispose();
   }
 
@@ -104,13 +126,13 @@ class _RootpageState extends State<Rootpage>
         ),
       ),
       body: _buildHomeBody(textcolor),
-      bottomNavigationBar: currentlyPlaying != null
+      bottomNavigationBar: _currentlyPlaying != null
           ? Songplayinglisttile(
-              song: currentlyPlaying!,
+              song: _currentlyPlaying!,
               isPlaying: isPlaying,
               onTap: () {
                 // Navigate to music player page
-                context.push('/musicplayer/${currentlyPlaying!.id}');
+                context.push('/musicplayer/${_currentlyPlaying!.id}');
               },
               onPause: _playPause,
             )

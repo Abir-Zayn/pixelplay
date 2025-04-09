@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pixelplayapp/core/config/theme/appColors.dart';
 import 'package:pixelplayapp/presentation/page/Search/Screen/SearchPageScreen.dart';
 import 'package:pixelplayapp/presentation/page/profile/screen/profilePage.dart';
 import 'package:pixelplayapp/presentation/page/root/pages/rootpage.dart';
@@ -18,6 +19,10 @@ class _EntrypointState extends State<Entrypoint> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? AppColors.lightBackgroundColor
+              : AppColors.darkBackgroundColor,
+            
           onDestinationSelected: (int index) {
             setState(() {
               _currentIndex = index;
@@ -40,6 +45,7 @@ class _EntrypointState extends State<Entrypoint> {
               selectedIcon: Icon(FontAwesomeIcons.magnifyingGlass),
               icon: Icon(FontAwesomeIcons.magnifyingGlassArrowRight),
               label: 'Search',
+              
             ),
           ]),
 

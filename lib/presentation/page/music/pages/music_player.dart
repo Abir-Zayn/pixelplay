@@ -219,8 +219,8 @@ class _MusicPlayerState extends State<MusicPlayer> {
                         // Album art with shadow
                         Center(
                           child: Container(
-                            height: 400.h,
-                            width: 350.w,
+                            height: MediaQuery.of(context).size.width * 0.72,
+                            width: MediaQuery.of(context).size.width * 0.60,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20.r),
                               boxShadow: [
