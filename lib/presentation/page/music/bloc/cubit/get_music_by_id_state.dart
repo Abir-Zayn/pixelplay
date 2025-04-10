@@ -1,7 +1,6 @@
 part of 'get_music_by_id_cubit.dart';
 
-@immutable
-sealed class GetMusicByIdState {}
+abstract class GetMusicByIdState {}
 
 final class GetMusicByIdInitial extends GetMusicByIdState {}
 

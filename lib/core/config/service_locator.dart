@@ -29,6 +29,7 @@ import 'package:pixelplayapp/domain/usecase/song/searchSongUseCase.dart';
 import 'package:pixelplayapp/domain/usecase/song/songuseCase.dart';
 import 'package:pixelplayapp/presentation/page/Search/cubit/search_song_cubit.dart';
 import 'package:pixelplayapp/presentation/page/music/bloc/cubit/get_music_by_id_cubit.dart';
+import 'package:pixelplayapp/presentation/page/music/bloc/cubit/shuffle_music_cubit.dart';
 import 'package:pixelplayapp/presentation/page/news/bloc/getNewsByIdCubit.dart';
 import 'package:pixelplayapp/presentation/page/news/bloc/likeUnlikeNewsCubit.dart';
 import 'package:pixelplayapp/presentation/page/root/bloc/getGenresCubit.dart';
@@ -84,6 +85,15 @@ Future<void> initializeDependencies() async {
   sl.registerSingleton<GetSongByIdUseCase>(
     GetSongByIdUseCase(sl<SongRepo>()),
   );
+  sl.registerFactory<ShuffleMusicCubit>(
+    () => ShuffleMusicCubit(
+      sl<SongsFirebaseService>(),
+      sl<AudioPlayerService>(),
+    ),
+  );
+  sl.registerSingleton<AudioPlayerService>(
+    AudioPlayerService(),
+  );
   sl.registerSingleton<AddremovefavSongUseCase>(
     AddremovefavSongUseCase(),
   );
@@ -95,10 +105,10 @@ Future<void> initializeDependencies() async {
   sl.registerSingleton<GetfavsongsUseCases>(
     GetfavsongsUseCases(),
   );
-  // Then register the AudioPlayerService which depends on the AudioHandler
-  sl.registerSingleton<AudioPlayerService>(
-    AudioPlayerService(),
-  );
+  // // Then register the AudioPlayerService which depends on the AudioHandler
+  // sl.registerSingleton<AudioPlayerService>(
+  //   AudioPlayerService(),
+  // );
   sl.registerSingleton<GetAllNewsUseCase>(
     GetAllNewsUseCase(),
   );
