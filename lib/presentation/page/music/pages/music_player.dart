@@ -184,6 +184,14 @@ class _MusicPlayerState extends State<MusicPlayer> {
               ),
             ),
             actions: [
+              // back button
+              IconButton(
+                icon: Icon(Icons.arrow_back, color: textColor),
+                onPressed: () {
+                  context.pop(); // Navigate back to the previous screen
+                },
+              ),
+
               //Equalizer navigation button
               PopupMenuButton(
                   icon: Icon(Icons.more_vert, color: textColor),

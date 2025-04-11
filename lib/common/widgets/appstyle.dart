@@ -12,7 +12,7 @@ TextStyle appStyle({
   TextDecorationStyle? decorationStyle,
   double? decorationThickness,
 }) {
-  return GoogleFonts.workSans(
+  return GoogleFonts.poppins(
     fontSize: size,
     color: color,
     fontWeight: fontWeight,
