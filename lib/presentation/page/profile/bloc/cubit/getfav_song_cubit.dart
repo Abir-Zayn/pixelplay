@@ -28,4 +28,22 @@ class GetfavSongCubit extends Cubit<GetfavSongState> {
       emit(GetfavSongError(errorMessage: e.toString()));
     }
   }
+
+  Future<void> refreshFavSongs() async {
+    // As the refresh logic is different than the initial load, therefore we will
+    //skip the loading state and directly call the getUserFavSong method
+    try {
+      final res = await sl<GetfavsongsUseCases>().call();
+      res.fold(
+        (error) {
+          emit(GetfavSongError(errorMessage: error.toString()));
+        },
+        (favsongList) {
+          emit(GetfavSongLoaded(favsongList: favsongList));
+        },
+      );
+    } catch (e) {
+      emit(GetfavSongError(errorMessage: e.toString()));
+    }
+  }
 }

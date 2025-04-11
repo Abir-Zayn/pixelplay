@@ -73,45 +73,11 @@ class _ProfilepageState extends State<Profilepage> {
           children: [
             _profileInfo(context),
             const SizedBox(height: 20),
-            _buildSectionTitle("Favorite Songs"),
-            const SizedBox(height: 10),
             GetFavSongWidget(
               textColor: textcolor,
             )
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: appStyle(
-              size: 18.sp,
-              color: textcolor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              // View all action
-            },
-            child: Text(
-              "See All",
-              style: appStyle(
-                size: 14.sp,
-                color: AppColors.primaryColor,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -321,7 +287,6 @@ class _ProfilepageState extends State<Profilepage> {
                             child: ElevatedButton(
                               onPressed: () async {
                                 widget.audioPlayerService.stop();
-                                widget.audioPlayerService.dispose();
                                 await sl<AuthRepo>().signOut();
                                 //Sign out the user and navigate to the sign-in page
                                 // and dispose the audio player service

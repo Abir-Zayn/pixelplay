@@ -24,7 +24,7 @@ class FavBtn extends StatelessWidget {
                 songEntity.isFav
                     ? FontAwesomeIcons.solidHeart
                     : FontAwesomeIcons.heart,
-                color: Colors.grey,
+                color: songEntity.isFav ? Colors.red : Colors.grey,
               ),
               onPressed: () {
                 context.read<FavBtnCubit>().updateFavBtn(songEntity.id);
@@ -33,7 +33,8 @@ class FavBtn extends StatelessWidget {
           }
 
           if (state is FavBtnUpdated) {
-            songEntity.isFav = state.isFav; // Update the songEntity's isFav status
+            songEntity.isFav =
+                state.isFav; // Update the songEntity's isFav status
             return IconButton(
               icon: Icon(
                 state.isFav

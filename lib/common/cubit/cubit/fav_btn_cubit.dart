@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:pixelplayapp/core/config/service_locator.dart';
 import 'package:pixelplayapp/domain/usecase/song/addRemoveFav.dart';
 import 'package:pixelplayapp/domain/usecase/song/isfavSong.dart';
+// No need to import EventBus here as it's already notified in the Firebase service
 
 part 'fav_btn_state.dart';
 
@@ -11,6 +12,7 @@ class FavBtnCubit extends Cubit<FavBtnState> {
     // Check current status when initialized
     checkFavStatus(songId);
   }
+
   void checkFavStatus(String sondId) async {
     final isFav = await sl<IsfavsongUseCase>().call(params: sondId);
     emit(FavBtnUpdated(isFav: isFav));
