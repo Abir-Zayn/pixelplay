@@ -92,4 +92,23 @@ Firebase / Custom Backend: Authentication and Database Management
 
 
 Pull requests are welcome! For major changes, please open an issue first to discuss your ideas.
-Last Updated on 11-04-2025
+
+![image](https://github.com/user-attachments/assets/766314e7-a163-47b5-917e-36b67beb31ce)
+Notion Project Outsight : 
+--------------------------
+https://www.notion.so/abirzayn/1cbaaff4194d8059b792f4d10d954e2e?v=1cbaaff4194d80dd9d71000c5e14bd0d&pvs=4
+
+App Download Link:
+--------------------
+**https://drive.google.com/file/d/18l9NRuEN0mLVgs9AdGanLTUfPAXBWpLT/view?usp=drive_link**
+
+
+
+Update Timeline
+------------------------
+Updated on 11-04-2025 X
+**LATEST** update on 14-04-2025 
+
+
+
+
