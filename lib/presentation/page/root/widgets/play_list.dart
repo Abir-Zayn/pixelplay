@@ -56,17 +56,15 @@ class _PlayListState extends State<PlayList> {
   }
 
   Future<Widget> _buildLoadingState() async {
-    return await Future.delayed(const Duration(seconds: 1), () {
-      return Center(
-        child: Lottie.asset(
-          Appvectors.loadingAnimation,
-          width: 100.w,
-          height: 100.h,
-          fit: BoxFit.contain,
-          repeat: true,
-        ),
-      );
-    });
+    return Center(
+      child: Lottie.asset(
+        Appvectors.loadingAnimation,
+        width: 100.w,
+        height: 100.h,
+        fit: BoxFit.contain,
+        repeat: true,
+      ),
+    );
   }
 
   Widget _buildErrorState(String error) {

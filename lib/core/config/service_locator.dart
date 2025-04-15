@@ -1,5 +1,9 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:pixelplayapp/core/config/utils/appwrite_provider.dart';
+import 'package:pixelplayapp/core/config/utils/hive_config.dart';
+import 'package:pixelplayapp/data/model/song/wishlistSongs.dart';
 import 'package:pixelplayapp/data/repo/auth/auth_repo_implementation.dart';
 import 'package:pixelplayapp/data/repo/news/news_repo_impl.dart';
 import 'package:pixelplayapp/data/repo/song/song_repo_implementation.dart';
@@ -7,6 +11,8 @@ import 'package:pixelplayapp/data/src/audio_player_service.dart';
 import 'package:pixelplayapp/data/src/auth_firebase_service.dart';
 import 'package:pixelplayapp/data/src/news_firebase_service.dart';
 import 'package:pixelplayapp/data/src/songs_firebase_service.dart';
+import 'package:pixelplayapp/data/src/wishlistSongsLocalStorage.dart';
+import 'package:pixelplayapp/data/src/wishlist_sync_service.dart';
 import 'package:pixelplayapp/domain/repo/auth_repo.dart';
 import 'package:pixelplayapp/domain/repo/news_repo.dart';
 import 'package:pixelplayapp/domain/repo/song_repo.dart';
@@ -37,6 +43,29 @@ import 'package:pixelplayapp/presentation/page/root/bloc/getGenresCubit.dart';
 final sl = GetIt.instance;
 
 Future<void> initializeDependencies() async {
+  // Register hive boxes
+  sl.registerSingleton<Box<Wishlistsongs>>(HiveConfig.getWishlistBox());
+
+  //Register WishListLocalStorage
+  sl.registerSingleton<Wishlistsongslocalstorage>(
+    WishlistsongslocalstorageImpl(
+      wishlistBox: sl<Box<Wishlistsongs>>(),
+    ),
+  );
+
+  // Register WishlistSyncService
+  sl.registerLazySingleton<WishlistSyncService>(
+    () => WishlistSyncService(
+      localStorage: sl<Wishlistsongslocalstorage>(),
+      firebaseService: sl<SongsFirebaseService>(),
+      connectivity: sl<Connectivity>(),
+    ),
+  );
+
+  sl.registerSingleton<Connectivity>(
+    Connectivity(),
+  );
+
   // Register Firebase services
   sl.registerSingleton<AuthFirebaseService>(
     AuthFirebaseServiceImplementation(),
@@ -51,7 +80,10 @@ Future<void> initializeDependencies() async {
     AuthRepoImplementation(),
   );
   sl.registerSingleton<SongRepo>(
-    SongRepositoryImplementation(),
+    SongRepositoryImplementation(
+      songsFirebaseService: sl<SongsFirebaseService>(),
+      wishlistsongslocalstorage: sl<Wishlistsongslocalstorage>(),
+    ),
   );
   sl.registerSingleton<NewsRepo>(
     NewsRepoImpl(),
@@ -105,10 +137,7 @@ Future<void> initializeDependencies() async {
   sl.registerSingleton<GetfavsongsUseCases>(
     GetfavsongsUseCases(),
   );
-  // // Then register the AudioPlayerService which depends on the AudioHandler
-  // sl.registerSingleton<AudioPlayerService>(
-  //   AudioPlayerService(),
-  // );
+
   sl.registerSingleton<GetAllNewsUseCase>(
     GetAllNewsUseCase(),
   );

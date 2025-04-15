@@ -173,8 +173,8 @@ class SongsFirebaseServiceImplementation extends SongsFirebaseService {
         isFav = true;
       }
 
-      // Notify the user about the success of the operation
-      Eventbus().notifyFavouritesChanged();
+      // // Notify the user about the success of the operation
+      // Eventbus().notifyFavouritesChanged();
       // Return the updated favorite status
       return Right(isFav);
     } catch (e) {
