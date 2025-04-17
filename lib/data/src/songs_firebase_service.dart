@@ -6,6 +6,7 @@ import 'package:pixelplayapp/core/config/service_locator.dart';
 import 'package:pixelplayapp/data/model/song/songs.dart';
 import 'package:pixelplayapp/domain/entities/song.dart';
 import 'package:pixelplayapp/domain/usecase/song/isfavSong.dart';
+import 'package:pixelplayapp/presentation/page/profile/bloc/cubit/eventBus.dart';
 
 abstract class SongsFirebaseService {
   Future<Either> getNewSong();
@@ -96,6 +97,13 @@ class SongsFirebaseServiceImplementation extends SongsFirebaseService {
 
       for (var doc in snapshot.docs) {
         var songModel = SongsModel.fromJson(doc.data());
+
+        //check if the song is fav
+        bool isFav = await checkIfSongIsFav(
+          songModel.id!,
+        );
+        //set the isFav property in the model
+        songModel.isFav = isFav;
         songs.add(songModel.toEntity());
       }
 
@@ -164,6 +172,10 @@ class SongsFirebaseServiceImplementation extends SongsFirebaseService {
         });
         isFav = true;
       }
+
+      // // Notify the user about the success of the operation
+      // Eventbus().notifyFavouritesChanged();
+      // Return the updated favorite status
       return Right(isFav);
     } catch (e) {
       return Left(e.toString());

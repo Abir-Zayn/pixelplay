@@ -37,7 +37,7 @@ final GoRouter _router = GoRouter(
       GoRoute(path: '/home', builder: (context, state) => const Rootpage()),
       GoRoute(
         path: '/profile',
-        builder: (context, state) => const Profilepage(),
+        builder: (context, state) => Profilepage(),
       ),
       GoRoute(
         path: '/musicplayer/:songId',

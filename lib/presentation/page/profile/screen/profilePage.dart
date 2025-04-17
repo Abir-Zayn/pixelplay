@@ -7,25 +7,31 @@ import 'package:pixelplayapp/common/widgets/appstyle.dart';
 import 'package:pixelplayapp/common/widgets/apptext.dart';
 import 'package:pixelplayapp/core/config/service_locator.dart';
 import 'package:pixelplayapp/core/config/theme/appColors.dart';
+import 'package:pixelplayapp/data/src/audio_player_service.dart';
 import 'package:pixelplayapp/domain/repo/auth_repo.dart';
 import 'package:pixelplayapp/presentation/page/profile/bloc/cubit/profile_info_cubit_cubit.dart';
 import 'package:pixelplayapp/presentation/page/profile/widget/favSongs.dart';
+import 'package:toastification/toastification.dart';
 
 class Profilepage extends StatefulWidget {
-  const Profilepage({super.key});
+  final AudioPlayerService audioPlayerService = sl<AudioPlayerService>();
+  Profilepage({super.key});
 
   @override
   State<Profilepage> createState() => _ProfilepageState();
 }
 
 class _ProfilepageState extends State<Profilepage> {
-  // Define a variable to hold the text color based on the theme
   Color textcolor = Colors.black;
 
   @override
   void initState() {
     super.initState();
-    // You can initialize any data or state here if needed
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -35,14 +41,34 @@ class _ProfilepageState extends State<Profilepage> {
         : AppColors.lightBackgroundColor;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.light
+          ? Colors.grey[100]
+          : Colors.grey[900],
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(
+          'Profile',
+          style: appStyle(
+            size: 20.sp,
+            color: textcolor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
+        elevation: 0,
         backgroundColor: Theme.of(context).brightness == Brightness.light
             ? Colors.white
             : Colors.black.withOpacity(0.8),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings_outlined, color: textcolor),
+            onPressed: () {
+              // Settings action here
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
             _profileInfo(context),
@@ -59,211 +85,299 @@ class _ProfilepageState extends State<Profilepage> {
   Widget _profileInfo(BuildContext context) {
     return BlocProvider(
       create: (context) => ProfileInfoCubitCubit()..getUser(),
-      child: Center(
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.45,
-          width: MediaQuery.of(context).size.width * 0.94,
-          decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black.withOpacity(0.8),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(30.r),
-              bottomRight: Radius.circular(30.r),
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black.withOpacity(0.8),
+          borderRadius: BorderRadius.circular(24.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              spreadRadius: 0,
+              offset: const Offset(0, 4),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                blurRadius: 5.0,
-                spreadRadius: 1.0,
-                offset: Offset(0.0, 3.0),
-              ),
-            ],
-          ),
-          child: BlocBuilder<ProfileInfoCubitCubit, ProfileInfoCubitState>(
-              builder: (context, state) {
+          ],
+        ),
+        child: BlocBuilder<ProfileInfoCubitCubit, ProfileInfoCubitState>(
+          builder: (context, state) {
             if (state is ProfileInfoCubitLoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
+              return SizedBox(
+                height: 400.h,
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
               );
             }
             if (state is ProfileInfoCubitError) {
-              // Show the snackbar but don't return it
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.errorMessage),
-                  ),
+                toastification.show(
+                  context: context,
+                  backgroundColor: Colors.red,
+                  title: AppTextstyle(
+                      text: 'Something Went Wrong',
+                      style: appStyle(
+                          size: 16.sp,
+                          color: textcolor,
+                          fontWeight: FontWeight.w500)),
+                  autoCloseDuration: const Duration(seconds: 2),
+                  type: ToastificationType.error,
                 );
               });
             }
             if (state is ProfileInfoCubitLoaded) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 50.r,
-                    backgroundImage: NetworkImage(
-                      "https://images.unsplash.com/photo-1499028344343-cd173ffc68a9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  AppTextstyle(
-                    text: state.userEntity.userName!,
-                    style: appStyle(
-                        size: 20.sp,
-                        color: textcolor,
-                        fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 5),
-                  AppTextstyle(
-                    text: state.userEntity.userEmail!,
-                    style: appStyle(
-                        size: 14.sp,
-                        color: textcolor.withOpacity(0.6),
-                        fontWeight: FontWeight.w400),
-                  ),
-                  const SizedBox(height: 10),
-                  //Show the UserId and a button that allows to copy the UserId
-                  AppTextstyle(
-                    text: "User ID: ${state.userEntity.userId}",
-                    style: appStyle(
-                        size: 14.sp,
-                        color: textcolor.withOpacity(0.6),
-                        fontWeight: FontWeight.w400),
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Implement the copy UserId functionality here
-                      final userId = state.userEntity.userId!;
-                      // Use a package like 'flutter/services.dart' to copy to clipboard
-                      Clipboard.setData(ClipboardData(text: userId));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          duration: Duration(seconds: 1),
-                          behavior: SnackBarBehavior.floating,
-                          backgroundColor: Colors.amber,
-                          content: AppTextstyle(
-                              text: "Copied Successfully",
-                              style: appStyle(
-                                  size: 12.sp,
-                                  color: AppColors.darkBackgroundColor,
-                                  fontWeight: FontWeight.w300)),
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Profile header
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 24.h),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(24.r),
+                          topRight: Radius.circular(24.r),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.r),
                       ),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 20.w, vertical: 10.h),
-                    ),
-                    child: AppTextstyle(
-                      text: "Copy User ID",
-                      style: appStyle(
-                          size: 14.sp,
-                          color: AppColors.lightBackgroundColor,
-                          fontWeight: FontWeight.w400),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10.h,
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      //Implementing LogOut logic
-                      await sl<AuthRepo>().signOut();
-
-                      // Show a snackbar to indicate successful logout
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          duration: const Duration(seconds: 1),
-                          behavior: SnackBarBehavior.floating,
-                          backgroundColor: Colors.amber,
-                          content: AppTextstyle(
-                              text: "Logged Out Successfully",
-                              style: appStyle(
-                                  size: 12.sp,
-                                  color: AppColors.darkBackgroundColor,
-                                  fontWeight: FontWeight.w300)),
-                        ),
-                      );
-                      //take the user to the login page
-                      context.go('/signin');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 20.w, vertical: 10.h),
-                    ),
-                    child: AppTextstyle(
-                      text: "Log Out",
-                      style: appStyle(
-                          size: 14.sp,
-                          color: AppColors.lightBackgroundColor,
-                          fontWeight: FontWeight.w400),
-                    ),
-                  ),
-
-                  //Show Following + Followers List , Followers List will be static for now
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Column(
+                      child: Column(
                         children: [
-                          AppTextstyle(
-                            text: "Followers",
-                            style: appStyle(
-                                size: 15.sp,
-                                color: textcolor,
-                                fontWeight: FontWeight.w600),
+                          // Profile image with border
+                          Container(
+                            padding: EdgeInsets.all(4.r),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.primaryColor,
+                                width: 2.w,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 55.r,
+                              backgroundImage: const NetworkImage(
+                                "https://images.unsplash.com/photo-1499028344343-cd173ffc68a9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                              ),
+                            ),
                           ),
+                          SizedBox(height: 16.h),
+                          // Username
                           AppTextstyle(
-                            text: "50",
+                            text: state.userEntity.userName!,
                             style: appStyle(
-                                size: 14.sp,
-                                color: textcolor.withOpacity(0.6),
-                                fontWeight: FontWeight.w400),
+                              size: 22.sp,
+                              color: textcolor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          // Email
+                          AppTextstyle(
+                            text: state.userEntity.userEmail!,
+                            style: appStyle(
+                              size: 14.sp,
+                              color: textcolor.withOpacity(0.7),
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(width: 20),
-                      Column(
+                    ),
+
+                    // Stats section (followers/following)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          AppTextstyle(
-                            text: "Following",
-                            style: appStyle(
-                                size: 16.sp,
-                                color: textcolor,
-                                fontWeight: FontWeight.w600),
-                          ),
-                          AppTextstyle(
-                            text: "50",
-                            style: appStyle(
-                                size: 14.sp,
-                                color: textcolor.withOpacity(0.6),
-                                fontWeight: FontWeight.w400),
-                          ),
+                          _buildStatItem("50", "Followers"),
+                          _buildDivider(),
+                          _buildStatItem("50", "Following"),
                         ],
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                ],
+                    ),
+
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      child: Column(
+                        children: [
+                          // User ID with copy button
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 12.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.grey[100]
+                                  : Colors.grey[800],
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.person_outline,
+                                  color: textcolor.withOpacity(0.7),
+                                  size: 20.sp,
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: Text(
+                                    "ID: ${state.userEntity.userId}",
+                                    style: appStyle(
+                                      size: 14.sp,
+                                      color: textcolor.withOpacity(0.8),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    final userId = state.userEntity.userId!;
+                                    Clipboard.setData(
+                                        ClipboardData(text: userId));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        duration: const Duration(seconds: 1),
+                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: AppColors.primaryColor,
+                                        content: Row(
+                                          children: [
+                                            Icon(Icons.check_circle,
+                                                color: Colors.white,
+                                                size: 16.sp),
+                                            SizedBox(width: 8.w),
+                                            Text(
+                                              "Copied to clipboard",
+                                              style: appStyle(
+                                                size: 14.sp,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(8.r),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryColor
+                                          .withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(8.r),
+                                    ),
+                                    child: Icon(
+                                      Icons.copy,
+                                      color: AppColors.primaryColor,
+                                      size: 18.sp,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 24.h),
+
+                          // Logout button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                widget.audioPlayerService.stop();
+                                await sl<AuthRepo>().signOut();
+                                //Sign out the user and navigate to the sign-in page
+                                // and dispose the audio player service
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  toastification.show(
+                                    context: context,
+                                    backgroundColor: Colors.yellow,
+                                    title: AppTextstyle(
+                                        text: 'SignOut Successfully',
+                                        style: appStyle(
+                                            size: 16.sp,
+                                            color: textcolor,
+                                            fontWeight: FontWeight.w500)),
+                                    autoCloseDuration:
+                                        const Duration(seconds: 2),
+                                    type: ToastificationType.info,
+                                  );
+                                });
+                                context.go('/signin');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 14.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.logout_rounded, size: 18.sp),
+                                  SizedBox(width: 8.w),
+                                  AppTextstyle(
+                                    text: "Log Out",
+                                    style: appStyle(
+                                      size: 16.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               );
             }
-            return const SizedBox
-                .shrink(); // Return an empty widget if no state matches
-          }),
+            return const SizedBox.shrink();
+          },
         ),
       ),
+    );
+  }
+
+  Widget _buildStatItem(String value, String label) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: appStyle(
+            size: 20.sp,
+            color: textcolor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          label,
+          style: appStyle(
+            size: 14.sp,
+            color: textcolor.withOpacity(0.7),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(
+      height: 30.h,
+      width: 1.w,
+      color: textcolor.withOpacity(0.2),
     );
   }
 }

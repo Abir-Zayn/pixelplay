@@ -12,7 +12,7 @@ import 'package:pixelplayapp/domain/entities/song.dart';
 import 'package:pixelplayapp/presentation/page/root/bloc/play_list_cubit.dart';
 import 'package:pixelplayapp/presentation/page/root/bloc/play_list_state_cubit.dart';
 
-class PlayList extends StatelessWidget {
+class PlayList extends StatefulWidget {
   final Color color;
   final Function(SongEntity, bool) onSongPlayed;
 
@@ -23,13 +23,27 @@ class PlayList extends StatelessWidget {
   });
 
   @override
+  State<PlayList> createState() => _PlayListState();
+}
+
+class _PlayListState extends State<PlayList> {
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => PlayListCubit()..getPlayList(),
       child: BlocBuilder<PlayListCubit, PlayListStateCubit>(
         builder: (context, state) {
           if (state is PlayListStateCubitLoading) {
-            return _buildLoadingState();
+            return FutureBuilder<Widget>(
+              future: _buildLoadingState(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return snapshot.data!;
+                } else {
+                  return const SizedBox.shrink();
+                }
+              },
+            );
           } else if (state is PlayListStateCubitError) {
             return _buildErrorState(state.error);
           } else if (state is PlayListStateCubitSuccess) {
@@ -41,7 +55,7 @@ class PlayList extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingState() {
+  Future<Widget> _buildLoadingState() async {
     return Center(
       child: Lottie.asset(
         Appvectors.loadingAnimation,
@@ -64,7 +78,7 @@ class PlayList extends StatelessWidget {
             error,
             style: appStyle(
               size: 16.sp,
-              color: color,
+              color: widget.color,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
@@ -87,7 +101,7 @@ class PlayList extends StatelessWidget {
                 text: "Discover Music",
                 style: appStyle(
                   size: 22.sp,
-                  color: color,
+                  color: widget.color,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -128,7 +142,7 @@ class PlayList extends StatelessWidget {
           separatorBuilder: (context, index) => Divider(
             height: 1.h,
             thickness: 0.5,
-            color: color.withOpacity(0.1),
+            color: widget.color.withOpacity(0.1),
             indent: 72.w, // Match image width + padding
             endIndent: 16.w,
           ),
@@ -145,7 +159,7 @@ class PlayList extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          onSongPlayed(song, true);
+          widget.onSongPlayed(song, true);
           context.push('/musicplayer/${song.id}');
         },
         borderRadius: BorderRadius.circular(12.r),
@@ -187,22 +201,22 @@ class PlayList extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      song.title,
+                    AppTextstyle(
+                      text: song.title,
                       style: appStyle(
                         size: 16.sp,
-                        color: color,
+                        color: widget.color,
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 4.h),
-                    Text(
-                      song.artist,
+                    AppTextstyle(
+                      text: song.artist,
                       style: appStyle(
                         size: 13.sp,
-                        color: color.withOpacity(0.7),
+                        color: widget.color.withOpacity(0.7),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -215,11 +229,11 @@ class PlayList extends StatelessWidget {
                 children: [
                   FavBtn(songEntity: song),
                   SizedBox(height: 4.h),
-                  Text(
-                    _formatDuration(song.duration.toInt()),
+                  AppTextstyle(
+                    text: _formatDuration(song.duration.toDouble()),
                     style: appStyle(
                       size: 12.sp,
-                      color: color.withOpacity(0.5),
+                      color: widget.color.withOpacity(0.5),
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -232,11 +246,11 @@ class PlayList extends StatelessWidget {
     );
   }
 
-  String _formatDuration(int seconds) {
-    final duration = Duration(seconds: seconds);
-    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final remainingSeconds =
-        duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return "$minutes:$remainingSeconds";
+  String _formatDuration(double minutes) {
+    final totalSeconds = (minutes * 60).round(); // Convert to seconds
+    final duration = Duration(seconds: totalSeconds);
+    final mins = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final secs = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return "$mins:$secs";
   }
 }

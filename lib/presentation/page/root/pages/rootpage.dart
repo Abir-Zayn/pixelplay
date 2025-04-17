@@ -88,16 +88,6 @@ class _RootpageState extends State<Rootpage>
         await _audioPlayerService.pause();
       }
     }
-
-    // if (isPlaying) {
-    //   await _audioPlayerService.play(song.musicUrl);
-    // } else {
-    //   await _audioPlayerService.pause();
-    // }
-    // setState(() {
-    //   _currentlyPlaying = song;
-    //   this.isPlaying = isPlaying; // Ensure isPlaying is updated here
-    // });
   }
 
   @override
