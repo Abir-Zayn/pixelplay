@@ -103,6 +103,13 @@ App Download Link:
 **https://drive.google.com/file/d/18l9NRuEN0mLVgs9AdGanLTUfPAXBWpLT/view?usp=drive_link**
 
 
+Notice :
+--------------------
+[17-04-2025] the project will have a significant by end of the month as of right now Im currently working on the Hive database . the outline is similar like this.
+![image](https://github.com/user-attachments/assets/1a551f07-5570-4bbe-9152-94611b566322)
+Also Song Indicator tile needs a fix during shuffle, this will also be fix within this month update.
+
+
 
 Update Timeline
 ------------------------
